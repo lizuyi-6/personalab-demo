@@ -47,6 +47,9 @@
             background: #E5E7EB;
             color: #6B7280;
         }
+        .city-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -64,7 +67,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500">v0.3</span>
+                    <span class="text-sm text-gray-500">v0.5</span>
                     <a href="https://github.com/lizuyi-6/personalab-demo" target="_blank" 
                        class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -99,87 +102,43 @@
         <!-- Step 1: Input Idea -->
         <section id="step1-section" class="mb-12 fade-in">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-3xl mx-auto">
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">💡 描述你的产品想法</h3>
-                <p class="text-gray-500 mb-6">用简单的语言描述你想做什么产品，AI 会帮你生成完整的 PRD</p>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">产品想法</label>
-                        <textarea id="product-idea" rows="5"
-                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                  placeholder="例如：我想做一个效率笔记App，帮助用户记录和管理日常笔记，支持Markdown编辑，可以同步到云端，还有AI智能摘要功能"></textarea>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">产品名称（可选）</label>
-                            <input type="text" id="product-name" 
-                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl"
-                                   placeholder="自动生成">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">行业类型（可选）</label>
-                            <select id="industry" class="w-full px-4 py-3 border border-gray-200 rounded-xl">
-                                <option value="">自动检测</option>
-                                <option value="效率工具">效率工具</option>
-                                <option value="社交应用">社交应用</option>
-                                <option value="电商平台">电商平台</option>
-                                <option value="内容平台">内容平台</option>
-                                <option value="教育学习">教育学习</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">描述你的产品想法</h2>
+                    <p class="text-gray-500">AI 将自动生成 PRD 并模拟验证</p>
                 </div>
                 
-                <div class="mt-8 flex justify-center">
+                <textarea id="product-idea" 
+                          class="w-full h-40 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="例如：一个 AI 驱动的笔记应用，支持 Markdown 编辑、云同步、智能摘要..."></textarea>
+                
+                <div class="flex justify-center mt-6">
                     <button onclick="generatePRD()" 
-                            class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all flex items-center gap-2">
-                        <span>🤖</span>
-                        <span>生成 PRD 文档</span>
+                            class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all">
+                        🚀 生成 PRD 并开始验证
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Step 2: Generated PRD -->
-        <section id="step2-section" class="mb-12 hidden">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-5xl mx-auto">
+        <!-- Step 2: PRD Preview -->
+        <section id="step2-section" class="hidden mb-12">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-4xl mx-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900">📄 生成的 PRD 文档</h3>
-                        <p class="text-gray-500 text-sm mt-1">请确认是否符合你的想法，可以修改后继续</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="goBack(1)" 
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                            ← 修改想法
-                        </button>
-                        <button onclick="confirmPRD()" 
-                                class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all text-sm flex items-center gap-2">
-                            <span>✓</span>
-                            <span>确认并开始模拟</span>
-                        </button>
-                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">📋 PRD 预览</h2>
+                    <span class="text-sm text-gray-400" id="prd-id">ID: --</span>
                 </div>
                 
-                <div id="prd-preview" class="prose max-w-none">
-                    <!-- PRD 内容将填充这里 -->
-                </div>
+                <div id="prd-content" class="prose max-w-none mb-6"></div>
                 
-                <div class="mt-8 pt-6 border-t border-gray-100">
-                    <h4 class="font-medium text-gray-900 mb-4">🎯 模拟参数设置</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">AI 用户数量</label>
-                            <input type="number" id="sim-agent-count" value="50" min="10" max="500"
-                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">虚拟天数</label>
-                            <input type="number" id="sim-virtual-days" value="7" min="1" max="30"
-                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl">
-                        </div>
-                    </div>
+                <div class="flex justify-center gap-4">
+                    <button onclick="editPRD()" 
+                            class="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
+                        ✏️ 编辑 PRD
+                    </button>
+                    <button onclick="runSimulation()" 
+                            class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all">
+                        🎯 开始沙盘模拟
+                    </button>
                 </div>
             </div>
         </section>
@@ -197,6 +156,56 @@
 
         <!-- Results Section -->
         <section id="results-section" class="hidden fade-in">
+            <!-- City Overview Banner -->
+            <div id="city-banner" class="city-card rounded-2xl p-8 mb-8 text-white">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-1">🏙️ <span id="city-name">PersonaLab City</span></h2>
+                        <p class="text-blue-200">城市生态系统模拟</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-4xl font-bold" id="city-population">1000</p>
+                        <p class="text-blue-200">城市人口</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="text-blue-200 text-sm mb-1">产品渗透率</p>
+                        <p class="text-2xl font-bold" id="city-penetration">--</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="text-blue-200 text-sm mb-1">活跃用户</p>
+                        <p class="text-2xl font-bold" id="city-users">--</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="text-blue-200 text-sm mb-1">社交圈层</p>
+                        <p class="text-2xl font-bold" id="city-circles">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- City Demographics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Occupation Distribution -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">👔 职业分布</h3>
+                    <canvas id="occupation-chart" height="200"></canvas>
+                </div>
+                
+                <!-- Income Distribution -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">💰 收入分布</h3>
+                    <canvas id="income-chart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Tech Adoption Curve -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 技术采用曲线</h3>
+                <canvas id="adoption-chart" height="120"></canvas>
+            </div>
+
             <!-- Score Banner -->
             <div id="score-banner" class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 mb-8 text-white">
                 <div class="flex items-center justify-between">
@@ -232,6 +241,32 @@
                     <p class="text-sm text-gray-500 mb-1">放弃率</p>
                     <p class="text-3xl font-bold text-gray-900" id="metric-abandon">--</p>
                     <p class="text-xs text-gray-400 mt-1">基准: <15%</p>
+                </div>
+            </div>
+
+            <!-- Community Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">💬 社区活跃度</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">发帖总数</span>
+                            <span class="font-bold text-lg" id="community-posts">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">评论总数</span>
+                            <span class="font-bold text-lg" id="community-comments">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">今日活跃</span>
+                            <span class="font-bold text-lg" id="community-active">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">🌟 用户等级分布</h3>
+                    <div id="level-distribution" class="space-y-2"></div>
                 </div>
             </div>
 
@@ -271,6 +306,9 @@
         let currentPRDId = null;
         let currentResult = null;
         let currentStep = 1;
+        let occupationChart = null;
+        let incomeChart = null;
+        let adoptionChart = null;
 
         // Step management
         function setStep(step) {
@@ -318,10 +356,8 @@
             showLoading('正在生成 PRD...', 'AI 正在分析你的产品想法');
             setStep(2);
 
-            // Simulate delay
             await new Promise(r => setTimeout(r, 1500));
 
-            // Generate PRD (demo mode)
             const prd = generateDemoPRD(idea);
             currentPRDId = `prd_${Date.now()}`;
 
@@ -331,7 +367,6 @@
         }
 
         function generateDemoPRD(idea) {
-            // Detect product type
             let productType = '效率工具';
             let features = ['核心功能', '用户管理', '数据存储'];
             
@@ -349,165 +384,114 @@
                 features = ['笔记创建', 'Markdown编辑', '云同步', 'AI摘要'];
             }
 
-            // Extract product name
-            let productName = '未命名产品';
-            const nameMatch = idea.match(/做一个(.{2,10}?)(?:，|,|。|\.|帮助)/);
-            if (nameMatch) {
-                productName = nameMatch[1];
-            }
-
             return {
-                title: productName,
-                product_summary: `一款${productType}类产品，${idea.substring(0, 100)}`,
-                product_vision: '成为用户日常生活中不可或缺的工具，提升工作效率和生活质量。',
-                target_users: [
-                    { name: '核心用户', description: '25-35岁职场人士', needs: '高效便捷' },
-                    { name: '次要用户', description: '18-25岁学生群体', needs: '免费易用' }
-                ],
-                core_features: features.map((f, i) => ({
+                product_name: idea.slice(0, 20) + (idea.length > 20 ? '...' : ''),
+                product_type: productType,
+                description: idea,
+                features: features.map(f => ({
                     name: f,
-                    description: `${f}功能，提供核心服务`,
-                    priority: i === 0 ? 'P0' : i < 3 ? 'P1' : 'P2',
-                    complexity: i === 0 ? '高' : '中等',
-                    value: `解决用户${f}需求`,
-                    scenarios: [`场景: 用户需要${f}`]
+                    description: `${f}的详细说明`,
+                    priority: 'P0'
                 })),
-                pain_points: [
-                    { pain: '效率低下', current: '现有工具复杂', solution: '简化流程', advantage: '更高效' }
-                ],
-                success_metrics: [
-                    { name: 'DAU', target: '10,000+', method: '日活统计' },
-                    { name: '留存率', target: '40%+', method: '次日留存' }
-                ],
-                risks: [
-                    { risk: '竞品压力', probability: '高', impact: '中', mitigation: '差异化定位' }
-                ]
+                target_users: ['学生', '白领', '自由职业者'],
+                metrics: {
+                    success_criteria: ['注册率 > 35%', '留存率 > 40%', 'NPS > 20']
+                }
             };
         }
 
         function showPRDPreview(prd) {
-            const html = `
-<div class="bg-gray-50 rounded-xl p-6 mb-6">
-    <h1 class="text-2xl font-bold text-gray-900 mb-4">${prd.title} - 产品需求文档</h1>
-    <p class="text-gray-600">${prd.product_summary}</p>
-</div>
-
-<div class="mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">🎯 目标用户</h2>
-    <div class="grid grid-cols-2 gap-3">
-        ${prd.target_users.map(u => `
-        <div class="bg-gray-50 rounded-lg p-4">
-            <p class="font-medium">${u.name}</p>
-            <p class="text-sm text-gray-500">${u.description}</p>
-        </div>
-        `).join('')}
-    </div>
-</div>
-
-<div class="mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">⚡ 核心功能</h2>
-    <div class="space-y-3">
-        ${prd.core_features.map(f => `
-        <div class="border border-gray-200 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="font-medium">${f.name}</span>
-                <span class="text-xs px-2 py-1 bg-indigo-100 text-indigo-600 rounded">${f.priority}</span>
-            </div>
-            <p class="text-sm text-gray-500">${f.description}</p>
-            <p class="text-xs text-gray-400 mt-2">复杂度: ${f.complexity}</p>
-        </div>
-        `).join('')}
-    </div>
-</div>
-
-<div class="mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">📊 成功指标</h2>
-    <div class="grid grid-cols-3 gap-3">
-        ${prd.success_metrics.map(m => `
-        <div class="bg-green-50 rounded-lg p-4 text-center">
-            <p class="text-sm text-gray-600">${m.name}</p>
-            <p class="text-xl font-bold text-green-600">${m.target}</p>
-        </div>
-        `).join('')}
-    </div>
-</div>
+            document.getElementById('prd-id').textContent = `ID: ${currentPRDId}`;
+            document.getElementById('prd-content').innerHTML = `
+                <div class="bg-gray-50 rounded-xl p-6 mb-4">
+                    <h3 class="font-semibold text-gray-900 text-lg mb-2">${prd.product_name}</h3>
+                    <p class="text-gray-600 mb-4">${prd.description}</p>
+                    <p class="text-sm text-gray-500">产品类型: ${prd.product_type}</p>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-900 mb-2">核心功能</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${prd.features.map(f => `<span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">${f.name}</span>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">目标用户</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${prd.target_users.map(u => `<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">${u}</span>`).join('')}
+                    </div>
+                </div>
             `;
             
-            document.getElementById('prd-preview').innerHTML = html;
             document.getElementById('step2-section').classList.remove('hidden');
-            document.getElementById('step2-section').classList.add('fade-in');
+            document.getElementById('step1-section').classList.add('hidden');
         }
 
-        function goBack(toStep) {
-            hideLoading();
-            if (toStep === 1) {
-                document.getElementById('step1-section').classList.remove('hidden');
-                document.getElementById('step2-section').classList.add('hidden');
-                setStep(1);
-            }
-        }
-
-        async function confirmPRD() {
-            setStep(3);
-            showLoading('正在启动沙盘模拟...', '生成 AI 用户画像');
-
-            const agentCount = parseInt(document.getElementById('sim-agent-count').value) || 50;
-            const virtualDays = parseInt(document.getElementById('sim-virtual-days').value) || 7;
-
-            // Simulate progress
-            const statuses = [
-                '生成 OCEAN 人格模型...',
-                '构建虚拟环境...',
-                '启动沙盘推演...',
-                '收集用户反馈...',
-                '计算核心指标...'
-            ];
-            
-            for (const status of statuses) {
-                document.getElementById('loading-status').textContent = status;
-                await new Promise(r => setTimeout(r, 500));
-            }
-
+        async function runSimulation() {
+            showLoading('正在构建城市...', '初始化职业分布和社交网络');
             setStep(4);
-            
-            // Generate result
-            const result = generateDemoResult('Demo Product', agentCount, virtualDays, []);
+
+            await new Promise(r => setTimeout(r, 2000));
+
+            const result = generateDemoResult();
             currentResult = result;
-            
+
             hideLoading();
             showResults(result);
+            setStep(4);
         }
 
-        function generateDemoResult(productName, agentCount, virtualDays, features) {
-            const signupRate = Math.floor(Math.random() * 40 + 25);
-            const retentionRate = Math.floor(Math.random() * 30 + 35);
-            const nps = Math.floor(Math.random() * 60 - 20);
-            const abandonRate = Math.floor(Math.random() * 25 + 10);
-            
-            const feedbacks = [
-                "这个功能不错，解决了我的问题 👍",
-                "操作太复杂了，找不到入口 😕",
-                "加载有点慢，体验不太好",
-                "界面设计挺好看的",
-                "这个功能有什么用？感觉很鸡肋",
-                "终于有人做了这个！期待后续",
-                "Bug有点多，稳定性需要加强",
-                "体验很流畅，会推荐给朋友"
-            ];
-            
+        function generateDemoResult() {
+            const agentCount = 100;
+            const signupRate = 30 + Math.random() * 40;
+            const retentionRate = 25 + Math.random() * 50;
+            const nps = -10 + Math.random() * 60;
+            const abandonRate = 5 + Math.random() * 30;
+
+            const occupations = {
+                '软件工程师': 15,
+                '产品经理': 12,
+                '设计师': 10,
+                '创业者': 8,
+                '学生': 18,
+                '教师': 10,
+                '医生': 6,
+                '自由职业': 12,
+                '其他': 9
+            };
+
+            const incomeDist = {
+                '低收入 (<10K)': 300,
+                '中收入 (10-25K)': 500,
+                '高收入 (>25K)': 200
+            };
+
+            const adoptionDist = {
+                '创新者': 25,
+                '早期采用者': 135,
+                '早期大众': 340,
+                '晚期大众': 350,
+                '落后者': 150
+            };
+
             const actions = [];
-            const actionTypes = ['view', 'click', 'signup', 'purchase', 'complain', 'praise', 'share'];
-            
+            const actionTypes = ['浏览', '注册', '使用', '分享', '投诉'];
+            const feedbacks = [
+                '这个功能很实用！', '界面很简洁，喜欢', '速度有点慢',
+                '希望能增加暗色模式', '注册流程太复杂了', '体验不错',
+                '价格有点贵', '推荐给朋友了', 'Bug 有点多'
+            ];
+            const features = ['核心功能', '用户管理', '数据存储'];
+
             for (let i = 0; i < 60; i++) {
                 actions.push({
                     agent_id: `agent_${Math.floor(Math.random() * agentCount)}`,
                     type: actionTypes[Math.floor(Math.random() * actionTypes.length)],
-                    target: features.length > 0 ? features[Math.floor(Math.random() * features.length)].name : '核心功能',
+                    target: features[Math.floor(Math.random() * features.length)].name,
                     feedback: feedbacks[Math.floor(Math.random() * feedbacks.length)],
                     timestamp: new Date().toISOString()
                 });
             }
-            
+
             const insights = [];
             if (signupRate < 35) insights.push("⚠️ 注册率偏低，建议简化注册流程");
             if (retentionRate < 45) insights.push("⚠️ 留存率不足，用户缺乏持续使用的动力");
@@ -515,15 +499,35 @@
             else if (nps < 30) insights.push("🟡 NPS偏低，产品有改进空间");
             if (abandonRate > 20) insights.push("⚠️ 放弃率过高，存在体验断层");
             if (insights.length === 0) insights.push("✅ 产品整体表现良好");
-            
+
             return {
                 session_id: `sim_${Date.now()}`,
-                product_name: productName,
+                product_name: currentPRDId ? 'Demo产品' : '未知产品',
                 metrics: {
                     signup_rate: signupRate,
                     retention_rate: retentionRate,
                     nps: nps,
                     abandonment_rate: abandonRate
+                },
+                city: {
+                    population: 1000,
+                    penetration: 42.5,
+                    total_users: 425,
+                    circles: 16,
+                    occupations: occupations,
+                    income_distribution: incomeDist,
+                    adoption_distribution: adoptionDist
+                },
+                community: {
+                    total_posts: 156,
+                    total_comments: 423,
+                    active_users: 89,
+                    level_distribution: {
+                        '新人': 45,
+                        '活跃': 32,
+                        '达人': 18,
+                        'KOL': 5
+                    }
                 },
                 insights: insights,
                 actions: actions
@@ -534,7 +538,13 @@
             document.getElementById('results-section').classList.remove('hidden');
             document.getElementById('results-section').classList.add('fade-in');
             
-            // Calculate score
+            // City data
+            document.getElementById('city-population').textContent = result.city.population;
+            document.getElementById('city-penetration').textContent = result.city.penetration + '%';
+            document.getElementById('city-users').textContent = result.city.total_users;
+            document.getElementById('city-circles').textContent = result.city.circles;
+            
+            // Score
             let score = 50;
             score += Math.max(-10, (result.metrics.signup_rate - 35) / 2);
             score += Math.max(-15, (result.metrics.retention_rate - 40) / 2);
@@ -557,17 +567,43 @@
                 banner.className = 'bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-8 mb-8 text-white';
             }
             
-            document.getElementById('metric-signup').textContent = result.metrics.signup_rate + '%';
-            document.getElementById('metric-retention').textContent = result.metrics.retention_rate + '%';
-            document.getElementById('metric-nps').textContent = result.metrics.nps;
-            document.getElementById('metric-abandon').textContent = result.metrics.abandonment_rate + '%';
+            // Metrics
+            document.getElementById('metric-signup').textContent = result.metrics.signup_rate.toFixed(1) + '%';
+            document.getElementById('metric-retention').textContent = result.metrics.retention_rate.toFixed(1) + '%';
+            document.getElementById('metric-nps').textContent = result.metrics.nps.toFixed(1);
+            document.getElementById('metric-abandon').textContent = result.metrics.abandonment_rate.toFixed(1) + '%';
             
+            // Community stats
+            document.getElementById('community-posts').textContent = result.community.total_posts;
+            document.getElementById('community-comments').textContent = result.community.total_comments;
+            document.getElementById('community-active').textContent = result.community.active_users;
+            
+            // Level distribution
+            const levelDist = result.community.level_distribution;
+            const levelColors = {
+                '新人': 'bg-gray-400',
+                '活跃': 'bg-blue-500',
+                '达人': 'bg-purple-500',
+                'KOL': 'bg-yellow-500'
+            };
+            document.getElementById('level-distribution').innerHTML = Object.entries(levelDist).map(([level, count]) => `
+                <div class="flex items-center gap-2">
+                    <div class="w-20 text-sm text-gray-600">${level}</div>
+                    <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="${levelColors[level]} h-full rounded-full" style="width: ${count}%"></div>
+                    </div>
+                    <div class="w-10 text-right text-sm text-gray-900">${count}</div>
+                </div>
+            `).join('');
+            
+            // Insights
             document.getElementById('insights-list').innerHTML = result.insights.map(i => `
                 <div class="p-4 bg-gray-50 rounded-xl">
                     <p class="text-gray-700">${i}</p>
                 </div>
             `).join('');
             
+            // Activity feed
             document.getElementById('activity-feed').innerHTML = result.actions.slice(0, 20).map(a => `
                 <div class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0">
@@ -579,15 +615,98 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Charts
+            renderCharts(result);
+        }
+
+        function renderCharts(result) {
+            // Occupation Chart
+            if (occupationChart) occupationChart.destroy();
+            const occCtx = document.getElementById('occupation-chart').getContext('2d');
+            occupationChart = new Chart(occCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(result.city.occupations),
+                    datasets: [{
+                        data: Object.values(result.city.occupations),
+                        backgroundColor: [
+                            '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+                            '#ec4899', '#f43f5e', '#f97316', '#eab308', '#84cc16'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { boxWidth: 12, padding: 8 }
+                        }
+                    }
+                }
+            });
+            
+            // Income Chart
+            if (incomeChart) incomeChart.destroy();
+            const incCtx = document.getElementById('income-chart').getContext('2d');
+            incomeChart = new Chart(incCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(result.city.income_distribution),
+                    datasets: [{
+                        label: '人口',
+                        data: Object.values(result.city.income_distribution),
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+            
+            // Adoption Curve
+            if (adoptionChart) adoptionChart.destroy();
+            const adoptCtx = document.getElementById('adoption-chart').getContext('2d');
+            adoptionChart = new Chart(adoptCtx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(result.city.adoption_distribution),
+                    datasets: [{
+                        label: '人数',
+                        data: Object.values(result.city.adoption_distribution),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function editPRD() {
+            alert('编辑功能开发中...');
         }
 
         function exportReport() {
             if (!currentResult) return;
             const report = `# ${currentResult.product_name} 验证报告\n\n` +
-                `## 核心指标\n- 注册率: ${currentResult.metrics.signup_rate}%\n` +
-                `- 留存率: ${currentResult.metrics.retention_rate}%\n` +
-                `- NPS: ${currentResult.metrics.nps}\n` +
-                `- 放弃率: ${currentResult.metrics.abandonment_rate}%\n\n` +
+                `## 城市数据\n` +
+                `- 人口: ${currentResult.city.population}\n` +
+                `- 渗透率: ${currentResult.city.penetration}%\n` +
+                `- 用户数: ${currentResult.city.total_users}\n\n` +
+                `## 核心指标\n` +
+                `- 注册率: ${currentResult.metrics.signup_rate.toFixed(1)}%\n` +
+                `- 留存率: ${currentResult.metrics.retention_rate.toFixed(1)}%\n` +
+                `- NPS: ${currentResult.metrics.nps.toFixed(1)}\n` +
+                `- 放弃率: ${currentResult.metrics.abandonment_rate.toFixed(1)}%\n\n` +
                 `## 洞察\n${currentResult.insights.join('\n')}`;
             
             const blob = new Blob([report], { type: 'text/markdown' });
@@ -599,24 +718,22 @@
         }
 
         function resetAll() {
-            currentStep = 1;
             currentPRDId = null;
             currentResult = null;
-            setStep(1);
+            document.getElementById('product-idea').value = '';
             document.getElementById('step1-section').classList.remove('hidden');
             document.getElementById('step2-section').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('product-idea').value = '';
+            setStep(1);
         }
 
         function runAgain() {
-            if (currentPRDId) {
-                confirmPRD();
+            if (!currentPRDId) {
+                resetAll();
+                return;
             }
+            runSimulation();
         }
-
-        // Initialize
-        setStep(1);
     </script>
 </body>
 </html>
