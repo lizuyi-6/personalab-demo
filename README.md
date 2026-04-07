@@ -2,7 +2,7 @@
 
 > 上线前的平行宇宙 —— 用 AI 模拟真实用户，在代码写下第一行之前验证产品逻辑
 
-[![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://personalab-demo.vercel.app)
+[![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://github.com/lizuyi-6/personalab-demo)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -21,32 +21,58 @@
 
 ---
 
+## ✨ v0.2 新特性
+
+| 功能 | 说明 |
+|------|------|
+| **📄 PRD 解析** | 上传 PRD 文档自动提取功能列表 |
+| **📊 可视化图表** | 功能热度、行为分布图表 |
+| **📥 报告导出** | 一键导出 Markdown 验证报告 |
+| **🤖 LLM 路由** | 支持多模型（OpenAI / Mock 模式）|
+| **🎭 真实性引擎** | 博弈论约束确保模拟真实性 |
+
+---
+
 ## 🚀 快速开始
 
-### 方式一：在线 Demo
+### 方式一：在线 Demo（推荐）
 
 ```bash
-# 打开前端页面
+# 直接打开前端（内置 Demo 模式）
 open frontend/index.html
 ```
 
-前端内置了 Demo 模式，无需后端即可体验完整流程。
+无需后端即可体验完整流程！
 
 ### 方式二：完整部署
 
 ```bash
-# 1. 安装依赖
+# 1. 克隆项目
+git clone https://github.com/lizuyi-6/personalab-demo.git
+cd personalab-demo
+
+# 2. 安装依赖
 cd backend
 pip install -r requirements.txt
 
-# 2. 启动 API 服务
+# 3. 启动 API 服务
 python api.py
 
-# 3. 打开前端
+# 4. 打开前端
 open frontend/index.html
 ```
 
 API 将在 `http://localhost:8000` 运行。
+
+### 使用真实 LLM（可选）
+
+```bash
+# 设置 OpenAI API Key
+export OPENAI_API_KEY="sk-xxx"
+
+# 启动服务
+python api.py
+```
 
 ---
 
@@ -55,16 +81,23 @@ API 将在 `http://localhost:8000` 运行。
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      前端 (index.html)                       │
-│   需求输入 | 结果可视化 | 实时反馈流                           │
+│   需求输入 | PRD上传 | 结果可视化 | 图表 | 报告导出          │
 ├─────────────────────────────────────────────────────────────┤
 │                    API (FastAPI)                            │
-│   POST /api/simulate | GET /api/simulations/:id            │
+│   /simulate | /prd/parse | /report | /llm                  │
 ├─────────────────────────────────────────────────────────────┤
 │                   核心引擎                                   │
 │  ┌─────────────────┐  ┌─────────────────────────────────┐   │
 │  │ Agent Generator │  │     Sandbox Engine              │   │
 │  │ OCEAN 人格模型   │  │  真实性校验 | 博弈论约束         │   │
 │  └─────────────────┘  └─────────────────────────────────┘   │
+│  ┌─────────────────┐  ┌─────────────────────────────────┐   │
+│  │   PRD Parser    │  │   Report Generator              │   │
+│  │   文档解析       │  │   Markdown 报告生成             │   │
+│  └─────────────────┘  └─────────────────────────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│                   LLM Router                                │
+│   OpenAI GPT-4o | Claude | DeepSeek | Mock (离线)           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -95,22 +128,25 @@ API 将在 `http://localhost:8000` 运行。
 
 ---
 
-## 📊 Demo 效果
+## 📊 使用示例
 
-输入：
-```
+### 输入
+
+```markdown
 产品名称：效率笔记 App
-功能列表：
-  - 核心笔记功能 | 复杂度: 0.3
-  - Markdown 编辑 | 复杂度: 0.5
-  - AI 智能摘要 | 复杂度: 0.7
-  - 团队协作 | 复杂度: 0.8
+
+核心功能：
+- 核心笔记功能 | 复杂度: 0.3
+- Markdown 编辑 | 复杂度: 0.5
+- AI 智能摘要 | 复杂度: 0.7
+- 团队协作 | 复杂度: 0.8
 
 AI 用户数：50
 虚拟天数：7
 ```
 
-输出：
+### 输出
+
 ```
 📊 核心指标：
   - 注册转化率: 42%
@@ -126,31 +162,8 @@ AI 用户数：50
 💬 AI 用户反馈：
   agent_23: "这个功能不错，解决了我的问题 👍"
   agent_45: "操作太复杂了，找不到入口 😕"
-  agent_12: "AI 摘要有时候不准，不如自己写"
   ...
 ```
-
----
-
-## 🗺️ 路线图
-
-### Phase 1 (当前) - MVP Demo
-- [x] OCEAN 人格模型
-- [x] 基础推演引擎
-- [x] Web 前端 Demo
-- [x] 核心指标计算
-
-### Phase 2 - 增强版本
-- [ ] 接入真实 LLM (GPT-4 / Claude)
-- [ ] 多模型路由 (成本优化)
-- [ ] PRD 文档自动解析
-- [ ] Figma 原型集成
-
-### Phase 3 - 商业化
-- [ ] SaaS 平台
-- [ ] 企业订阅系统
-- [ ] 私有化人设库
-- [ ] API 开放平台
 
 ---
 
@@ -160,13 +173,55 @@ AI 用户数：50
 personalab-demo/
 ├── backend/
 │   ├── api.py              # FastAPI 服务
-│   ├── agent_generator.py  # Agent 生成器
+│   ├── agent_generator.py  # Agent 生成器 (OCEAN)
 │   ├── sandbox_engine.py   # 推演引擎
+│   ├── llm_client.py       # LLM 路由器
+│   ├── prd_parser.py       # PRD 解析器
+│   ├── report_generator.py # 报告生成器
 │   └── requirements.txt    # Python 依赖
 ├── frontend/
 │   └── index.html          # Web 前端
 └── README.md
 ```
+
+---
+
+## 🔌 API 端点
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/agents/generate` | POST | 生成 AI 用户 |
+| `/api/prd/parse` | POST | 解析 PRD 文档 |
+| `/api/prd/upload` | POST | 上传 PRD 文件 |
+| `/api/simulate` | POST | 运行沙盘模拟 |
+| `/api/simulations/{id}` | GET | 获取模拟结果 |
+| `/api/simulations/{id}/report` | GET | 导出完整报告 |
+| `/api/llm/status` | GET | 查看LLM状态 |
+
+---
+
+## 🗺️ 路线图
+
+### ✅ v0.2 (当前)
+- [x] OCEAN 人格模型
+- [x] 基础推演引擎
+- [x] Web 前端 Demo
+- [x] 核心指标计算
+- [x] PRD 文档解析
+- [x] 报告导出
+- [x] 可视化图表
+
+### 🚧 v0.3 (计划中)
+- [ ] 接入真实 LLM 生成反馈
+- [ ] Figma 原型集成
+- [ ] A/B 测试对比
+- [ ] 历史模拟管理
+
+### 🎯 v1.0 (商业化)
+- [ ] SaaS 平台
+- [ ] 企业订阅系统
+- [ ] 私有化部署
+- [ ] API 开放平台
 
 ---
 
