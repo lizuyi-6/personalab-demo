@@ -21,13 +21,6 @@
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
-        .pulse-dot {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
@@ -42,6 +35,18 @@
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
         }
+        .step-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .step-done {
+            background: #10B981;
+            color: white;
+        }
+        .step-pending {
+            background: #E5E7EB;
+            color: #6B7280;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -55,14 +60,11 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-semibold text-gray-900">PersonaLab</h1>
-                        <p class="text-xs text-gray-500">A2A 产品验证沙盘</p>
+                        <p class="text-xs text-gray-500">产品想法 → PRD → 验证</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <span class="pulse-dot w-2 h-2 bg-green-500 rounded-full"></span>
-                        <span class="text-sm text-gray-500">v0.2 Demo</span>
-                    </div>
+                    <span class="text-sm text-gray-500">v0.3</span>
                     <a href="https://github.com/lizuyi-6/personalab-demo" target="_blank" 
                        class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -75,160 +77,121 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-8">
-        <!-- Hero Section -->
-        <section class="text-center py-8">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">
-                上线前的<span class="gradient-text">平行宇宙</span>
-            </h2>
-            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                用 AI 模拟真实用户，在代码写下第一行之前验证产品逻辑
-            </p>
-        </section>
-
-        <!-- Tab Navigation -->
-        <div class="flex justify-center gap-4 mb-8">
-            <button onclick="switchTab('quick')" id="tab-quick" 
-                    class="px-6 py-2 rounded-full bg-indigo-500 text-white font-medium transition-all">
-                快速模式
-            </button>
-            <button onclick="switchTab('prd')" id="tab-prd" 
-                    class="px-6 py-2 rounded-full bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all">
-                PRD 解析
-            </button>
+        <!-- Progress Steps -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-2">
+                <div id="step-1" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-active">1</div>
+                <div class="w-12 h-1 bg-gray-200 rounded" id="line-1"></div>
+                <div id="step-2" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-pending">2</div>
+                <div class="w-12 h-1 bg-gray-200 rounded" id="line-2"></div>
+                <div id="step-3" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-pending">3</div>
+                <div class="w-12 h-1 bg-gray-200 rounded" id="line-3"></div>
+                <div id="step-4" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-pending">4</div>
+            </div>
+            <div class="ml-4 flex items-center gap-4 text-sm">
+                <span id="step-label-1" class="text-indigo-600 font-medium">输入想法</span>
+                <span id="step-label-2" class="text-gray-400">生成PRD</span>
+                <span id="step-label-3" class="text-gray-400">确认PRD</span>
+                <span id="step-label-4" class="text-gray-400">沙盘模拟</span>
+            </div>
         </div>
 
-        <!-- Quick Mode -->
-        <section id="quick-section" class="mb-12 fade-in">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6">🚀 新建沙盘推演</h3>
+        <!-- Step 1: Input Idea -->
+        <section id="step1-section" class="mb-12 fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-3xl mx-auto">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">💡 描述你的产品想法</h3>
+                <p class="text-gray-500 mb-6">用简单的语言描述你想做什么产品，AI 会帮你生成完整的 PRD</p>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">产品名称</label>
-                            <input type="text" id="product-name" 
-                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                   placeholder="例如：效率笔记App">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">产品描述</label>
-                            <textarea id="product-desc" rows="3"
-                                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                      placeholder="简述你的产品核心价值和目标用户..."></textarea>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">AI 用户数</label>
-                                <input type="number" id="agent-count" value="50" min="10" max="500"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">虚拟天数</label>
-                                <input type="number" id="virtual-days" value="7" min="1" max="30"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl">
-                            </div>
-                        </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">产品想法</label>
+                        <textarea id="product-idea" rows="5"
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                  placeholder="例如：我想做一个效率笔记App，帮助用户记录和管理日常笔记，支持Markdown编辑，可以同步到云端，还有AI智能摘要功能"></textarea>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">核心功能 (每行一个)</label>
-                        <textarea id="features" rows="8"
-                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl font-mono text-sm"
-                                  placeholder="核心笔记功能 | 复杂度: 0.3
-Markdown编辑器 | 复杂度: 0.5
-AI智能摘要 | 复杂度: 0.7
-团队协作 | 复杂度: 0.8
-云端同步 | 复杂度: 0.4"></textarea>
-                        <p class="text-xs text-gray-500 mt-2">格式：功能名称 | 复杂度: 0-1</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">产品名称（可选）</label>
+                            <input type="text" id="product-name" 
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl"
+                                   placeholder="自动生成">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">行业类型（可选）</label>
+                            <select id="industry" class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                                <option value="">自动检测</option>
+                                <option value="效率工具">效率工具</option>
+                                <option value="社交应用">社交应用</option>
+                                <option value="电商平台">电商平台</option>
+                                <option value="内容平台">内容平台</option>
+                                <option value="教育学习">教育学习</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="mt-8 flex justify-center">
-                    <button onclick="runSimulation()" 
+                    <button onclick="generatePRD()" 
                             class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all flex items-center gap-2">
-                        <span>🎯</span>
-                        <span>启动沙盘推演</span>
+                        <span>🤖</span>
+                        <span>生成 PRD 文档</span>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- PRD Mode -->
-        <section id="prd-section" class="mb-12 hidden">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6">📄 上传 PRD 文档</h3>
-                
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-12 text-center mb-6"
-                     ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-                    <input type="file" id="prd-file" accept=".md,.txt" class="hidden" onchange="handleFileUpload(event)">
-                    <div class="text-gray-400 mb-4">
-                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                        </svg>
-                    </div>
-                    <p class="text-gray-600 mb-2">拖拽文件到此处，或</p>
-                    <button onclick="document.getElementById('prd-file').click()" 
-                            class="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors">
-                        选择文件
-                    </button>
-                    <p class="text-xs text-gray-400 mt-2">支持 .md / .txt 格式</p>
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">或直接粘贴 PRD 内容</label>
-                    <textarea id="prd-content" rows="10"
-                              class="w-full px-4 py-3 border border-gray-200 rounded-xl font-mono text-sm"
-                              placeholder="# 产品需求文档
-
-## 概述
-产品描述...
-
-## 目标用户
-- 用户群体1
-- 用户群体2
-
-## 核心功能
-1. 功能A
-2. 功能B
-"></textarea>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
+        <!-- Step 2: Generated PRD -->
+        <section id="step2-section" class="mb-12 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-5xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">AI 用户数</label>
-                        <input type="number" id="prd-agent-count" value="50" min="10" max="500"
-                               class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                        <h3 class="text-xl font-semibold text-gray-900">📄 生成的 PRD 文档</h3>
+                        <p class="text-gray-500 text-sm mt-1">请确认是否符合你的想法，可以修改后继续</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">虚拟天数</label>
-                        <input type="number" id="prd-virtual-days" value="7" min="1" max="30"
-                               class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                    <div class="flex gap-2">
+                        <button onclick="goBack(1)" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            ← 修改想法
+                        </button>
+                        <button onclick="confirmPRD()" 
+                                class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all text-sm flex items-center gap-2">
+                            <span>✓</span>
+                            <span>确认并开始模拟</span>
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex justify-center">
-                    <button onclick="runPRDSimulation()" 
-                            class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all flex items-center gap-2">
-                        <span>📄</span>
-                        <span>解析并启动推演</span>
-                    </button>
+                <div id="prd-preview" class="prose max-w-none">
+                    <!-- PRD 内容将填充这里 -->
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <h4 class="font-medium text-gray-900 mb-4">🎯 模拟参数设置</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">AI 用户数量</label>
+                            <input type="number" id="sim-agent-count" value="50" min="10" max="500"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">虚拟天数</label>
+                            <input type="number" id="sim-virtual-days" value="7" min="1" max="30"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Loading Section -->
         <section id="loading-section" class="hidden mb-12">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-2xl mx-auto">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4">
                     <span class="text-3xl animate-spin">⚡</span>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">推演进行中...</h3>
-                <p class="text-gray-500" id="loading-status">正在生成 AI 用户画像</p>
-                <div class="w-64 h-2 bg-gray-100 rounded-full mt-4 mx-auto overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2" id="loading-title">处理中...</h3>
+                <p class="text-gray-500" id="loading-status">请稍候</p>
             </div>
         </section>
 
@@ -272,21 +235,6 @@ AI智能摘要 | 复杂度: 0.7
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <!-- Feature Usage Chart -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 功能热度</h3>
-                    <canvas id="featureChart" height="200"></canvas>
-                </div>
-                
-                <!-- Action Distribution Chart -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 行为分布</h3>
-                    <canvas id="actionChart" height="200"></canvas>
-                </div>
-            </div>
-
             <!-- Insights Panel -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
                 <div class="flex items-center justify-between mb-4">
@@ -296,199 +244,238 @@ AI智能摘要 | 复杂度: 0.7
                         <span>📥</span> 导出报告
                     </button>
                 </div>
-                <div id="insights-list" class="space-y-3">
-                    <!-- 动态填充 -->
-                </div>
+                <div id="insights-list" class="space-y-3"></div>
             </div>
 
             <!-- Activity Feed -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">💬 AI 用户实时反馈</h3>
-                <div id="activity-feed" class="space-y-2 max-h-96 overflow-y-auto">
-                    <!-- 动态填充 -->
-                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">💬 AI 用户反馈</h3>
+                <div id="activity-feed" class="space-y-2 max-h-96 overflow-y-auto"></div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-4">
-                <button onclick="goBack()" 
+                <button onclick="resetAll()" 
                         class="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
-                    ← 新建推演
+                    ← 重新开始
                 </button>
                 <button onclick="runAgain()" 
                         class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all">
-                    🔄 重新推演
+                    🔄 重新模拟
                 </button>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-100 py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
-            <p>PersonaLab Demo v0.2 - 用 A2A 技术验证产品假设</p>
-            <p class="mt-2">
-                <a href="https://github.com/lizuyi-6/personalab-demo" class="text-indigo-500 hover:underline">GitHub</a>
-                · Powered by OCEAN 人格模型 + 博弈论约束
-            </p>
-        </div>
-    </footer>
-
     <script>
+        let currentPRDId = null;
         let currentResult = null;
-        let featureChart = null;
-        let actionChart = null;
+        let currentStep = 1;
 
-        // Tab switching
-        function switchTab(tab) {
-            document.getElementById('tab-quick').className = tab === 'quick' 
-                ? 'px-6 py-2 rounded-full bg-indigo-500 text-white font-medium transition-all'
-                : 'px-6 py-2 rounded-full bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all';
-            document.getElementById('tab-prd').className = tab === 'prd'
-                ? 'px-6 py-2 rounded-full bg-indigo-500 text-white font-medium transition-all'
-                : 'px-6 py-2 rounded-full bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all';
-            
-            document.getElementById('quick-section').classList.toggle('hidden', tab !== 'quick');
-            document.getElementById('prd-section').classList.toggle('hidden', tab !== 'prd');
-        }
-
-        // File upload handlers
-        function handleDrop(event) {
-            event.preventDefault();
-            const file = event.dataTransfer.files[0];
-            if (file) processFile(file);
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) processFile(file);
-        }
-
-        function processFile(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('prd-content').value = e.target.result;
-            };
-            reader.readAsText(file);
-        }
-
-        function parseFeatures(text) {
-            const lines = text.trim().split('\n').filter(l => l.trim());
-            return lines.map(line => {
-                const parts = line.split('|').map(p => p.trim());
-                return {
-                    name: parts[0] || '未命名功能',
-                    complexity: parseFloat((parts[1] || '').replace('复杂度:', '').trim()) || 0.5,
-                    solves: []
-                };
-            });
-        }
-
-        async function runSimulation() {
-            const productName = document.getElementById('product-name').value || '测试产品';
-            const productDesc = document.getElementById('product-desc').value || '产品描述';
-            const agentCount = parseInt(document.getElementById('agent-count').value) || 50;
-            const virtualDays = parseInt(document.getElementById('virtual-days').value) || 7;
-            const featuresText = document.getElementById('features').value;
-            const features = parseFeatures(featuresText);
-            
-            showLoading();
-            
-            // Simulate progress
-            await simulateProgress();
-            
-            // Generate demo result
-            const result = generateDemoResult(productName, agentCount, virtualDays, features);
-            currentResult = result;
-            showResults(result);
-        }
-
-        async function runPRDSimulation() {
-            const prdContent = document.getElementById('prd-content').value;
-            const agentCount = parseInt(document.getElementById('prd-agent-count').value) || 50;
-            const virtualDays = parseInt(document.getElementById('prd-virtual-days').value) || 7;
-            
-            if (!prdContent.trim()) {
-                alert('请输入 PRD 内容');
-                return;
-            }
-            
-            showLoading();
-            
-            // Parse PRD
-            const parsed = parsePRD(prdContent);
-            await simulateProgress();
-            
-            const result = generateDemoResult(parsed.title, agentCount, virtualDays, parsed.features);
-            currentResult = result;
-            showResults(result);
-        }
-
-        function parsePRD(content) {
-            // Simple PRD parser
-            const lines = content.split('\n');
-            let title = '未命名产品';
-            let features = [];
-            
-            // Find title (first # heading)
-            for (const line of lines) {
-                if (line.startsWith('# ')) {
-                    title = line.replace('# ', '').trim();
-                    break;
+        // Step management
+        function setStep(step) {
+            currentStep = step;
+            for (let i = 1; i <= 4; i++) {
+                const stepEl = document.getElementById(`step-${i}`);
+                const labelEl = document.getElementById(`step-label-${i}`);
+                const lineEl = document.getElementById(`line-${i-1}`);
+                
+                if (i < step) {
+                    stepEl.className = 'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-done';
+                    labelEl.className = 'text-green-600 font-medium';
+                    if (lineEl) lineEl.className = 'w-12 h-1 bg-green-500 rounded';
+                } else if (i === step) {
+                    stepEl.className = 'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-active';
+                    labelEl.className = 'text-indigo-600 font-medium';
+                } else {
+                    stepEl.className = 'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium step-pending';
+                    labelEl.className = 'text-gray-400';
+                    if (lineEl) lineEl.className = 'w-12 h-1 bg-gray-200 rounded';
                 }
             }
-            
-            // Find features (list items after "功能" section)
-            let inFeatureSection = false;
-            for (const line of lines) {
-                if (line.includes('功能') && (line.startsWith('##') || line.startsWith('#'))) {
-                    inFeatureSection = true;
-                    continue;
-                }
-                if (inFeatureSection && line.trim().startsWith('-')) {
-                    const name = line.replace(/^[-\d.]+\s*/, '').trim();
-                    if (name && name.length > 1) {
-                        features.push({ name, complexity: 0.5, solves: [] });
-                    }
-                }
-                if (inFeatureSection && line.startsWith('##') && !line.includes('功能')) {
-                    inFeatureSection = false;
-                }
-            }
-            
-            // Default features if none found
-            if (features.length === 0) {
-                features = [
-                    { name: '核心功能', complexity: 0.5, solves: [] }
-                ];
-            }
-            
-            return { title, features };
         }
 
-        function showLoading() {
-            document.getElementById('quick-section').classList.add('hidden');
-            document.getElementById('prd-section').classList.add('hidden');
+        function showLoading(title, status) {
+            document.getElementById('loading-title').textContent = title;
+            document.getElementById('loading-status').textContent = status;
             document.getElementById('loading-section').classList.remove('hidden');
+            document.getElementById('step1-section').classList.add('hidden');
+            document.getElementById('step2-section').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
         }
 
-        async function simulateProgress() {
+        function hideLoading() {
+            document.getElementById('loading-section').classList.add('hidden');
+        }
+
+        async function generatePRD() {
+            const idea = document.getElementById('product-idea').value.trim();
+            if (!idea) {
+                alert('请描述你的产品想法');
+                return;
+            }
+
+            showLoading('正在生成 PRD...', 'AI 正在分析你的产品想法');
+            setStep(2);
+
+            // Simulate delay
+            await new Promise(r => setTimeout(r, 1500));
+
+            // Generate PRD (demo mode)
+            const prd = generateDemoPRD(idea);
+            currentPRDId = `prd_${Date.now()}`;
+
+            hideLoading();
+            showPRDPreview(prd);
+            setStep(2);
+        }
+
+        function generateDemoPRD(idea) {
+            // Detect product type
+            let productType = '效率工具';
+            let features = ['核心功能', '用户管理', '数据存储'];
+            
+            if (idea.includes('社交') || idea.includes('聊天')) {
+                productType = '社交应用';
+                features = ['动态发布', '好友系统', '消息聊天', '个人主页'];
+            } else if (idea.includes('电商') || idea.includes('购物')) {
+                productType = '电商平台';
+                features = ['商品搜索', '购物车', '订单管理', '支付系统'];
+            } else if (idea.includes('学习') || idea.includes('教育')) {
+                productType = '教育学习';
+                features = ['课程管理', '学习进度', '练习测试', '社区讨论'];
+            } else if (idea.includes('笔记') || idea.includes('效率')) {
+                productType = '效率工具';
+                features = ['笔记创建', 'Markdown编辑', '云同步', 'AI摘要'];
+            }
+
+            // Extract product name
+            let productName = '未命名产品';
+            const nameMatch = idea.match(/做一个(.{2,10}?)(?:，|,|。|\.|帮助)/);
+            if (nameMatch) {
+                productName = nameMatch[1];
+            }
+
+            return {
+                title: productName,
+                product_summary: `一款${productType}类产品，${idea.substring(0, 100)}`,
+                product_vision: '成为用户日常生活中不可或缺的工具，提升工作效率和生活质量。',
+                target_users: [
+                    { name: '核心用户', description: '25-35岁职场人士', needs: '高效便捷' },
+                    { name: '次要用户', description: '18-25岁学生群体', needs: '免费易用' }
+                ],
+                core_features: features.map((f, i) => ({
+                    name: f,
+                    description: `${f}功能，提供核心服务`,
+                    priority: i === 0 ? 'P0' : i < 3 ? 'P1' : 'P2',
+                    complexity: i === 0 ? '高' : '中等',
+                    value: `解决用户${f}需求`,
+                    scenarios: [`场景: 用户需要${f}`]
+                })),
+                pain_points: [
+                    { pain: '效率低下', current: '现有工具复杂', solution: '简化流程', advantage: '更高效' }
+                ],
+                success_metrics: [
+                    { name: 'DAU', target: '10,000+', method: '日活统计' },
+                    { name: '留存率', target: '40%+', method: '次日留存' }
+                ],
+                risks: [
+                    { risk: '竞品压力', probability: '高', impact: '中', mitigation: '差异化定位' }
+                ]
+            };
+        }
+
+        function showPRDPreview(prd) {
+            const html = `
+<div class="bg-gray-50 rounded-xl p-6 mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">${prd.title} - 产品需求文档</h1>
+    <p class="text-gray-600">${prd.product_summary}</p>
+</div>
+
+<div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">🎯 目标用户</h2>
+    <div class="grid grid-cols-2 gap-3">
+        ${prd.target_users.map(u => `
+        <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-medium">${u.name}</p>
+            <p class="text-sm text-gray-500">${u.description}</p>
+        </div>
+        `).join('')}
+    </div>
+</div>
+
+<div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">⚡ 核心功能</h2>
+    <div class="space-y-3">
+        ${prd.core_features.map(f => `
+        <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-medium">${f.name}</span>
+                <span class="text-xs px-2 py-1 bg-indigo-100 text-indigo-600 rounded">${f.priority}</span>
+            </div>
+            <p class="text-sm text-gray-500">${f.description}</p>
+            <p class="text-xs text-gray-400 mt-2">复杂度: ${f.complexity}</p>
+        </div>
+        `).join('')}
+    </div>
+</div>
+
+<div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">📊 成功指标</h2>
+    <div class="grid grid-cols-3 gap-3">
+        ${prd.success_metrics.map(m => `
+        <div class="bg-green-50 rounded-lg p-4 text-center">
+            <p class="text-sm text-gray-600">${m.name}</p>
+            <p class="text-xl font-bold text-green-600">${m.target}</p>
+        </div>
+        `).join('')}
+    </div>
+</div>
+            `;
+            
+            document.getElementById('prd-preview').innerHTML = html;
+            document.getElementById('step2-section').classList.remove('hidden');
+            document.getElementById('step2-section').classList.add('fade-in');
+        }
+
+        function goBack(toStep) {
+            hideLoading();
+            if (toStep === 1) {
+                document.getElementById('step1-section').classList.remove('hidden');
+                document.getElementById('step2-section').classList.add('hidden');
+                setStep(1);
+            }
+        }
+
+        async function confirmPRD() {
+            setStep(3);
+            showLoading('正在启动沙盘模拟...', '生成 AI 用户画像');
+
+            const agentCount = parseInt(document.getElementById('sim-agent-count').value) || 50;
+            const virtualDays = parseInt(document.getElementById('sim-virtual-days').value) || 7;
+
+            // Simulate progress
             const statuses = [
-                '正在生成 AI 用户画像...',
-                '初始化 OCEAN 人格模型...',
+                '生成 OCEAN 人格模型...',
                 '构建虚拟环境...',
                 '启动沙盘推演...',
                 '收集用户反馈...',
-                '计算核心指标...',
-                '生成洞察报告...'
+                '计算核心指标...'
             ];
             
-            for (let i = 0; i < statuses.length; i++) {
-                document.getElementById('loading-status').textContent = statuses[i];
-                document.getElementById('progress-bar').style.width = ((i + 1) / statuses.length * 100) + '%';
-                await new Promise(r => setTimeout(r, 400));
+            for (const status of statuses) {
+                document.getElementById('loading-status').textContent = status;
+                await new Promise(r => setTimeout(r, 500));
             }
+
+            setStep(4);
+            
+            // Generate result
+            const result = generateDemoResult('Demo Product', agentCount, virtualDays, []);
+            currentResult = result;
+            
+            hideLoading();
+            showResults(result);
         }
 
         function generateDemoResult(productName, agentCount, virtualDays, features) {
@@ -500,20 +487,18 @@ AI智能摘要 | 复杂度: 0.7
             const feedbacks = [
                 "这个功能不错，解决了我的问题 👍",
                 "操作太复杂了，找不到入口 😕",
-                "加载有点慢，等了3秒...",
+                "加载有点慢，体验不太好",
                 "界面设计挺好看的",
                 "这个功能有什么用？感觉很鸡肋",
-                "终于有人做了这个！",
-                "Bug太多了吧，点两次就崩溃",
-                "体验很流畅，会推荐给朋友",
-                "价格太贵了，学生党负担不起",
-                "还不错，但竞品更好用"
+                "终于有人做了这个！期待后续",
+                "Bug有点多，稳定性需要加强",
+                "体验很流畅，会推荐给朋友"
             ];
             
             const actions = [];
-            const actionTypes = ['view', 'click', 'signup', 'purchase', 'complain', 'praise', 'share', 'abandon'];
+            const actionTypes = ['view', 'click', 'signup', 'purchase', 'complain', 'praise', 'share'];
             
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 60; i++) {
                 actions.push({
                     agent_id: `agent_${Math.floor(Math.random() * agentCount)}`,
                     type: actionTypes[Math.floor(Math.random() * actionTypes.length)],
@@ -524,31 +509,21 @@ AI智能摘要 | 复杂度: 0.7
             }
             
             const insights = [];
-            if (signupRate < 35) insights.push("⚠️ 注册率偏低，建议简化注册流程，减少必填项");
-            if (retentionRate < 45) insights.push("⚠️ 留存率不足，用户缺乏持续使用的动力，考虑增加引导或激励");
-            if (nps < 0) insights.push("🔴 NPS为负，产品存在严重问题，需要立即检查高频投诉点");
+            if (signupRate < 35) insights.push("⚠️ 注册率偏低，建议简化注册流程");
+            if (retentionRate < 45) insights.push("⚠️ 留存率不足，用户缺乏持续使用的动力");
+            if (nps < 0) insights.push("🔴 NPS为负，产品存在严重问题");
             else if (nps < 30) insights.push("🟡 NPS偏低，产品有改进空间");
-            if (abandonRate > 20) insights.push("⚠️ 放弃率过高，可能存在体验断层或核心价值不清晰");
-            if (features.length > 0) insights.push(`🔥 热门功能：${features[0].name}`);
-            if (insights.length === 0) insights.push("✅ 产品整体表现良好，建议进行更大规模测试验证");
-            
-            // Calculate feature usage
-            const featureUsage = {};
-            features.forEach(f => {
-                featureUsage[f.name] = Math.floor(Math.random() * 100 + 50);
-            });
+            if (abandonRate > 20) insights.push("⚠️ 放弃率过高，存在体验断层");
+            if (insights.length === 0) insights.push("✅ 产品整体表现良好");
             
             return {
-                session_id: `demo_${Date.now()}`,
+                session_id: `sim_${Date.now()}`,
                 product_name: productName,
                 metrics: {
-                    total_agents: agentCount,
                     signup_rate: signupRate,
                     retention_rate: retentionRate,
                     nps: nps,
-                    abandonment_rate: abandonRate,
-                    complaint_rate: Math.floor(Math.random() * 15 + 5),
-                    feature_usage: featureUsage
+                    abandonment_rate: abandonRate
                 },
                 insights: insights,
                 actions: actions
@@ -556,11 +531,10 @@ AI智能摘要 | 复杂度: 0.7
         }
 
         function showResults(result) {
-            document.getElementById('loading-section').classList.add('hidden');
             document.getElementById('results-section').classList.remove('hidden');
             document.getElementById('results-section').classList.add('fade-in');
             
-            // Calculate overall score
+            // Calculate score
             let score = 50;
             score += Math.max(-10, (result.metrics.signup_rate - 35) / 2);
             score += Math.max(-15, (result.metrics.retention_rate - 40) / 2);
@@ -571,11 +545,9 @@ AI智能摘要 | 复杂度: 0.7
             document.getElementById('overall-score').textContent = score;
             document.getElementById('session-id').textContent = `Session: ${result.session_id}`;
             
-            // Set verdict
             let verdict = score >= 70 ? "✅ 产品表现良好" : score >= 50 ? "🟡 有潜力但需优化" : "🔴 存在严重问题";
             document.getElementById('verdict-text').textContent = verdict;
             
-            // Set banner color
             const banner = document.getElementById('score-banner');
             if (score >= 70) {
                 banner.className = 'bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 mb-8 text-white';
@@ -585,158 +557,66 @@ AI智能摘要 | 复杂度: 0.7
                 banner.className = 'bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-8 mb-8 text-white';
             }
             
-            // Fill metrics
             document.getElementById('metric-signup').textContent = result.metrics.signup_rate + '%';
             document.getElementById('metric-retention').textContent = result.metrics.retention_rate + '%';
             document.getElementById('metric-nps').textContent = result.metrics.nps;
             document.getElementById('metric-abandon').textContent = result.metrics.abandonment_rate + '%';
             
-            // Fill insights
-            document.getElementById('insights-list').innerHTML = result.insights.map(insight => `
-                <div class="p-4 bg-gray-50 rounded-xl slide-in">
-                    <p class="text-gray-700">${insight}</p>
+            document.getElementById('insights-list').innerHTML = result.insights.map(i => `
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <p class="text-gray-700">${i}</p>
                 </div>
             `).join('');
             
-            // Fill activity feed
-            document.getElementById('activity-feed').innerHTML = result.actions.slice(0, 30).map((action, i) => `
-                <div class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors slide-in" style="animation-delay: ${i * 0.05}s">
+            document.getElementById('activity-feed').innerHTML = result.actions.slice(0, 20).map(a => `
+                <div class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <span class="text-white text-xs font-medium">${action.agent_id.slice(-2)}</span>
+                        <span class="text-white text-xs">${a.agent_id.slice(-2)}</span>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm text-gray-900">${action.feedback}</p>
-                        <p class="text-xs text-gray-400 mt-1">${action.target} · ${action.type}</p>
+                    <div>
+                        <p class="text-sm text-gray-900">${a.feedback}</p>
+                        <p class="text-xs text-gray-400">${a.target} · ${a.type}</p>
                     </div>
                 </div>
             `).join('');
-            
-            // Draw charts
-            drawFeatureChart(result.metrics.feature_usage);
-            drawActionChart(result.actions);
-        }
-
-        function drawFeatureChart(featureUsage) {
-            if (featureChart) featureChart.destroy();
-            
-            const labels = Object.keys(featureUsage);
-            const data = Object.values(featureUsage);
-            
-            featureChart = new Chart(document.getElementById('featureChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '使用次数',
-                        data: data,
-                        backgroundColor: 'rgba(99, 102, 241, 0.5)',
-                        borderColor: 'rgb(99, 102, 241)',
-                        borderWidth: 1,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        function drawActionChart(actions) {
-            if (actionChart) actionChart.destroy();
-            
-            const counts = {};
-            actions.forEach(a => {
-                counts[a.type] = (counts[a.type] || 0) + 1;
-            });
-            
-            actionChart = new Chart(document.getElementById('actionChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(counts),
-                    datasets: [{
-                        data: Object.values(counts),
-                        backgroundColor: [
-                            'rgba(99, 102, 241, 0.7)',
-                            'rgba(139, 92, 246, 0.7)',
-                            'rgba(236, 72, 153, 0.7)',
-                            'rgba(16, 185, 129, 0.7)',
-                            'rgba(245, 158, 11, 0.7)',
-                            'rgba(239, 68, 68, 0.7)',
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'right' }
-                    }
-                }
-            });
         }
 
         function exportReport() {
             if (!currentResult) return;
+            const report = `# ${currentResult.product_name} 验证报告\n\n` +
+                `## 核心指标\n- 注册率: ${currentResult.metrics.signup_rate}%\n` +
+                `- 留存率: ${currentResult.metrics.retention_rate}%\n` +
+                `- NPS: ${currentResult.metrics.nps}\n` +
+                `- 放弃率: ${currentResult.metrics.abandonment_rate}%\n\n` +
+                `## 洞察\n${currentResult.insights.join('\n')}`;
             
-            const report = generateMarkdownReport(currentResult);
             const blob = new Blob([report], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `PersonaLab_Report_${currentResult.session_id}.md`;
+            a.download = `report_${currentResult.session_id}.md`;
             a.click();
-            URL.revokeObjectURL(url);
         }
 
-        function generateMarkdownReport(result) {
-            return `# PersonaLab 产品验证报告
-
-**产品名称**: ${result.product_name}  
-**Session ID**: ${result.session_id}  
-**生成时间**: ${new Date().toLocaleString('zh-CN')}
-
----
-
-## 📊 核心指标
-
-| 指标 | 数值 | 基准线 |
-|------|------|--------|
-| 注册转化率 | ${result.metrics.signup_rate}% | 35% |
-| 留存率 | ${result.metrics.retention_rate}% | 40% |
-| NPS 净推荐值 | ${result.metrics.nps} | 20 |
-| 放弃率 | ${result.metrics.abandonment_rate}% | <15% |
-
----
-
-## 💡 洞察与建议
-
-${result.insights.map(i => `- ${i}`).join('\n')}
-
----
-
-## 📊 功能热度
-
-${Object.entries(result.metrics.feature_usage || {}).map(([k, v]) => `- **${k}**: ${v} 次`).join('\n')}
-
----
-
-*本报告由 PersonaLab 自动生成*
-`;
-        }
-
-        function goBack() {
+        function resetAll() {
+            currentStep = 1;
+            currentPRDId = null;
+            currentResult = null;
+            setStep(1);
+            document.getElementById('step1-section').classList.remove('hidden');
+            document.getElementById('step2-section').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('quick-section').classList.remove('hidden');
+            document.getElementById('product-idea').value = '';
         }
 
         function runAgain() {
-            runSimulation();
+            if (currentPRDId) {
+                confirmPRD();
+            }
         }
+
+        // Initialize
+        setStep(1);
     </script>
 </body>
 </html>

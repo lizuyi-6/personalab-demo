@@ -1,6 +1,6 @@
 """
-PersonaLab API Server v0.2
-FastAPI 后端服务 - 增强版
+PersonaLab API Server v0.3
+FastAPI 后端服务 - 增强版 PRD 生成工作流
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -18,13 +18,14 @@ from agent_generator import AgentGenerator, AgentProfile
 from sandbox_engine import SandboxEngine, SimulationConfig, SimulationResult
 from llm_client import llm_router
 from prd_parser import PRDParser, DocumentType
+from prd_generator import PRDGenerator, GeneratedPRD
 from report_generator import ReportGenerator
 
 
 app = FastAPI(
     title="PersonaLab API",
-    description="A2A 产品验证 SaaS - API v0.2",
-    version="0.2.0"
+    description="A2A 产品验证 SaaS - API v0.3",
+    version="0.3.0"
 )
 
 # CORS
@@ -39,6 +40,7 @@ app.add_middleware(
 # 内存存储（Demo用）
 simulations: Dict[str, SimulationResult] = {}
 prd_cache: Dict[str, Dict] = {}
+generated_prds: Dict[str, GeneratedPRD] = {}
 
 
 # ============ 请求模型 ============
@@ -55,7 +57,7 @@ class SimulationRequest(BaseModel):
     features: List[FeatureModel]
     agent_count: int = 50
     virtual_days: int = 7
-    use_llm: bool = False  # 是否使用真实 LLM
+    use_llm: bool = False
 
 
 class AgentGenerateRequest(BaseModel):
@@ -65,7 +67,23 @@ class AgentGenerateRequest(BaseModel):
 
 class PRDParseRequest(BaseModel):
     content: str
-    doc_type: str = "text"  # text, md, pdf
+    doc_type: str = "text"
+
+
+class PRDGenerateRequest(BaseModel):
+    """PRD 生成请求"""
+    product_idea: str
+    product_name: Optional[str] = None
+    industry: Optional[str] = None
+    target_audience: Optional[str] = None
+
+
+class PRDConfirmRequest(BaseModel):
+    """PRD 确认请求"""
+    prd_id: str
+    edited_prd: Optional[Dict] = None  # 用户编辑后的 PRD
+    agent_count: int = 50
+    virtual_days: int = 7
 
 
 # ============ API 端点 ============
@@ -74,11 +92,12 @@ class PRDParseRequest(BaseModel):
 async def root():
     return {
         "name": "PersonaLab API",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "status": "running",
         "features": [
             "OCEAN 人格模型",
             "沙盘推演引擎",
+            "PRD 自动生成",  # 新增
             "PRD 文档解析",
             "报告生成",
             "多模型 LLM 路由"
@@ -91,7 +110,151 @@ async def get_status():
     """获取系统状态"""
     return {
         "simulations_count": len(simulations),
+        "generated_prds_count": len(generated_prds),
         "llm_stats": llm_router.get_stats()
+    }
+
+
+# ============ PRD 生成（新工作流核心） ============
+
+@app.post("/api/prd/generate")
+async def generate_prd(request: PRDGenerateRequest):
+    """
+    根据产品想法生成 PRD 文档
+    
+    工作流：
+    1. 用户输入产品想法
+    2. AI 生成完整 PRD
+    3. 返回 PRD 供用户确认/修改
+    """
+    
+    prd = PRDGenerator.generate(
+        product_idea=request.product_idea,
+        product_name=request.product_name,
+        industry=request.industry,
+        target_audience=request.target_audience
+    )
+    
+    # 生成唯一 ID
+    prd_id = f"prd_{datetime.now().strftime('%Y%m%d%H%M%S')}_{id(prd) % 10000}"
+    
+    # 缓存
+    generated_prds[prd_id] = prd
+    
+    return {
+        "prd_id": prd_id,
+        "prd": prd.to_dict(),
+        "markdown": prd.to_markdown(),
+        "message": "PRD 已生成，请确认是否符合您的想法"
+    }
+
+
+@app.get("/api/prd/{prd_id}")
+async def get_generated_prd(prd_id: str):
+    """获取生成的 PRD"""
+    if prd_id not in generated_prds:
+        raise HTTPException(status_code=404, detail="PRD not found")
+    
+    prd = generated_prds[prd_id]
+    
+    return {
+        "prd_id": prd_id,
+        "prd": prd.to_dict(),
+        "markdown": prd.to_markdown()
+    }
+
+
+@app.post("/api/prd/{prd_id}/confirm")
+async def confirm_prd(prd_id: str, request: PRDConfirmRequest):
+    """
+    确认 PRD 并启动沙盘模拟
+    
+    工作流：
+    1. 用户确认/修改 PRD
+    2. 启动沙盘模拟
+    3. 返回模拟结果
+    """
+    
+    if prd_id not in generated_prds:
+        raise HTTPException(status_code=404, detail="PRD not found")
+    
+    prd = generated_prds[prd_id]
+    
+    # 如果用户编辑了 PRD，使用编辑版本
+    if request.edited_prd:
+        # 更新 PRD
+        for key, value in request.edited_prd.items():
+            if hasattr(prd, key):
+                setattr(prd, key, value)
+    
+    # 转换功能格式
+    features = [
+        {
+            "name": f.get("name", "未命名功能"),
+            "complexity": cls._complexity_str_to_float(f.get("complexity", "中等")),
+            "solves": []
+        }
+        for f in prd.core_features
+    ]
+    
+    # 如果没有功能，使用默认
+    if not features:
+        features = [{"name": "核心功能", "complexity": 0.5, "solves": []}]
+    
+    # 生成 Agent
+    agents = AgentGenerator.generate_population(request.agent_count)
+    
+    # 创建配置
+    config = SimulationConfig(
+        product_name=prd.title,
+        product_description=prd.product_summary,
+        features=features,
+        virtual_days=request.virtual_days
+    )
+    
+    # 运行模拟
+    engine = SandboxEngine(config, agents)
+    result = await engine.run()
+    
+    # 存储
+    simulations[result.session_id] = result
+    
+    return {
+        "prd_id": prd_id,
+        "session_id": result.session_id,
+        "result": result.to_dict(),
+        "message": "模拟完成！"
+    }
+
+
+def _complexity_str_to_float(complexity_str: str) -> float:
+    """复杂度字符串转数值"""
+    mapping = {
+        "低": 0.3,
+        "中等": 0.5,
+        "高": 0.7,
+        "非常高": 0.9
+    }
+    return mapping.get(complexity_str, 0.5)
+
+
+@app.put("/api/prd/{prd_id}")
+async def update_prd(prd_id: str, updates: Dict):
+    """更新 PRD（用户编辑）"""
+    if prd_id not in generated_prds:
+        raise HTTPException(status_code=404, detail="PRD not found")
+    
+    prd = generated_prds[prd_id]
+    
+    # 更新字段
+    for key, value in updates.items():
+        if hasattr(prd, key):
+            setattr(prd, key, value)
+    
+    return {
+        "prd_id": prd_id,
+        "prd": prd.to_dict(),
+        "message": "PRD 已更新"
     }
 
 
@@ -111,13 +274,6 @@ async def generate_agents(request: AgentGenerateRequest):
     }
 
 
-@app.get("/api/agents/{agent_id}")
-async def get_agent(agent_id: str):
-    """获取单个Agent详情"""
-    agent = AgentGenerator.generate_agent()
-    return agent.to_dict()
-
-
 @app.get("/api/agents/{agent_id}/prompt")
 async def get_agent_prompt(agent_id: str):
     """获取 Agent 的模拟 Prompt"""
@@ -128,7 +284,7 @@ async def get_agent_prompt(agent_id: str):
     }
 
 
-# ============ PRD 解析 ============
+# ============ 旧 PRD 解析（保留兼容） ============
 
 @app.post("/api/prd/parse")
 async def parse_prd(request: PRDParseRequest):
@@ -146,7 +302,6 @@ async def parse_prd(request: PRDParseRequest):
     
     parsed = PRDParser.parse(request.content, doc_type)
     
-    # 缓存
     prd_id = f"prd_{datetime.now().strftime('%Y%m%d%H%M%S')}"
     prd_cache[prd_id] = parsed.to_dict()
     
@@ -156,47 +311,14 @@ async def parse_prd(request: PRDParseRequest):
     }
 
 
-@app.post("/api/prd/upload")
-async def upload_prd(file: UploadFile = File(...)):
-    """上传 PRD 文件"""
-    
-    content = await file.read()
-    
-    # 根据文件类型解析
-    filename = file.filename.lower()
-    
-    if filename.endswith('.md'):
-        doc_type = DocumentType.MARKDOWN
-        text = content.decode('utf-8')
-    elif filename.endswith('.txt'):
-        doc_type = DocumentType.TEXT
-        text = content.decode('utf-8')
-    elif filename.endswith('.pdf'):
-        doc_type = DocumentType.PDF
-        # TODO: 使用 PyPDF2 或 pdfplumber 解析
-        text = content.decode('utf-8', errors='ignore')
-    else:
-        doc_type = DocumentType.TEXT
-        text = content.decode('utf-8', errors='ignore')
-    
-    parsed = PRDParser.parse(text, doc_type)
-    
-    return {
-        "filename": file.filename,
-        "parsed": parsed.to_dict()
-    }
-
-
 # ============ 模拟相关 ============
 
 @app.post("/api/simulate")
 async def run_simulation(request: SimulationRequest):
-    """运行沙盘模拟"""
+    """运行沙盘模拟（直接模式）"""
     
-    # 生成Agent
     agents = AgentGenerator.generate_population(request.agent_count)
     
-    # 创建配置
     config = SimulationConfig(
         product_name=request.product_name,
         product_description=request.product_description,
@@ -204,57 +326,9 @@ async def run_simulation(request: SimulationRequest):
         virtual_days=request.virtual_days
     )
     
-    # 运行模拟
     engine = SandboxEngine(config, agents)
     result = await engine.run()
     
-    # 存储
-    simulations[result.session_id] = result
-    
-    return result.to_dict()
-
-
-@app.post("/api/simulate/from-prd")
-async def simulate_from_prd(
-    prd_content: str,
-    agent_count: int = 50,
-    virtual_days: int = 7
-):
-    """从 PRD 内容直接启动模拟"""
-    
-    # 解析 PRD
-    parsed = PRDParser.parse(prd_content, DocumentType.MARKDOWN)
-    
-    # 转换功能格式
-    features = [
-        {
-            "name": f["name"],
-            "complexity": f.get("complexity", 0.5),
-            "solves": []
-        }
-        for f in parsed.core_features
-    ]
-    
-    # 如果没有解析到功能，使用默认
-    if not features:
-        features = [{"name": "核心功能", "complexity": 0.5, "solves": []}]
-    
-    # 生成 Agent
-    agents = AgentGenerator.generate_population(agent_count)
-    
-    # 创建配置
-    config = SimulationConfig(
-        product_name=parsed.title,
-        product_description=parsed.summary,
-        features=features,
-        virtual_days=virtual_days
-    )
-    
-    # 运行模拟
-    engine = SandboxEngine(config, agents)
-    result = await engine.run()
-    
-    # 存储
     simulations[result.session_id] = result
     
     return result.to_dict()
@@ -330,7 +404,6 @@ async def get_full_report(session_id: str):
     
     result = simulations[session_id]
     
-    # 转换 actions 格式
     actions = [
         {
             "type": a.action_type.value,
@@ -374,8 +447,10 @@ async def test_llm(prompt: str, mode: str = "mock"):
 if __name__ == "__main__":
     print("""
     ╔═══════════════════════════════════════════╗
-    ║     PersonaLab API v0.2                  ║
+    ║     PersonaLab API v0.3                  ║
     ║     A2A 产品验证沙盘                      ║
+    ║                                          ║
+    ║     新增：PRD 自动生成工作流              ║
     ╚═══════════════════════════════════════════╝
     """)
     
