@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonaLab - A2A 产品验证沙盘</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <span class="text-white text-xl">🎭</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">PersonaLab</h1>
+                        <p class="text-xs text-gray-500">A2A 产品验证沙盘</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="pulse-dot w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span class="text-sm text-gray-500">Demo v0.1</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Hero Section -->
+        <section class="text-center py-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                上线前的<span class="gradient-text">平行宇宙</span>
+            </h2>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                用 AI 模拟真实用户，在代码写下第一行之前验证产品逻辑
+            </p>
+        </section>
+
+        <!-- Input Section -->
+        <section id="input-section" class="mb-12">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">🚀 新建沙盘推演</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left: Product Info -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">产品名称</label>
+                            <input type="text" id="product-name" 
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   placeholder="例如：效率笔记App">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">产品描述</label>
+                            <textarea id="product-desc" rows="3"
+                                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                      placeholder="简述你的产品核心价值和目标用户..."></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">AI 用户数</label>
+                                <input type="number" id="agent-count" value="50" min="10" max="500"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">虚拟天数</label>
+                                <input type="number" id="virtual-days" value="7" min="1" max="30"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Features -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">核心功能 (每行一个)</label>
+                        <textarea id="features" rows="8"
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl font-mono text-sm"
+                                  placeholder="核心笔记功能 | 复杂度: 0.3
+Markdown编辑器 | 复杂度: 0.5
+AI智能摘要 | 复杂度: 0.7
+团队协作 | 复杂度: 0.8
+云端同步 | 复杂度: 0.4"></textarea>
+                        <p class="text-xs text-gray-500 mt-2">格式：功能名称 | 复杂度: 0-1</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-center">
+                    <button onclick="runSimulation()" 
+                            class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all flex items-center gap-2">
+                        <span>🎯</span>
+                        <span>启动沙盘推演</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loading-section" class="hidden mb-12">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4">
+                    <span class="text-3xl animate-spin">⚡</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">推演进行中...</h3>
+                <p class="text-gray-500" id="loading-status">正在生成 AI 用户画像</p>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="hidden">
+            <!-- Metrics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-xl p-6 border border-gray-100 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">注册转化率</p>
+                    <p class="text-3xl font-bold text-gray-900" id="metric-signup">--</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-gray-100 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">留存率</p>
+                    <p class="text-3xl font-bold text-gray-900" id="metric-retention">--</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-gray-100 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">NPS 净推荐值</p>
+                    <p class="text-3xl font-bold text-gray-900" id="metric-nps">--</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-gray-100 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">放弃率</p>
+                    <p class="text-3xl font-bold text-gray-900" id="metric-abandon">--</p>
+                </div>
+            </div>
+
+            <!-- Insights Panel -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">💡 洞察与建议</h3>
+                <div id="insights-list" class="space-y-3">
+                    <!-- 动态填充 -->
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">💬 AI 用户实时反馈</h3>
+                <div id="activity-feed" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- 动态填充 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-100 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
+            <p>PersonaLab Demo - 用 A2A 技术验证产品假设</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        // Demo 数据（离线模式）
+        const demoMode = true;
+        
+        function parseFeatures(text) {
+            const lines = text.trim().split('\n').filter(l => l.trim());
+            return lines.map(line => {
+                const parts = line.split('|').map(p => p.trim());
+                return {
+                    name: parts[0] || '未命名功能',
+                    complexity: parseFloat((parts[1] || '').replace('复杂度:', '').trim()) || 0.5,
+                    solves: []
+                };
+            });
+        }
+        
+        async function runSimulation() {
+            const productName = document.getElementById('product-name').value || '测试产品';
+            const productDesc = document.getElementById('product-desc').value || '产品描述';
+            const agentCount = parseInt(document.getElementById('agent-count').value) || 50;
+            const virtualDays = parseInt(document.getElementById('virtual-days').value) || 7;
+            const featuresText = document.getElementById('features').value;
+            const features = parseFeatures(featuresText);
+            
+            // 显示加载
+            document.getElementById('input-section').classList.add('hidden');
+            document.getElementById('loading-section').classList.remove('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            
+            // 模拟进度
+            const statuses = [
+                '正在生成 AI 用户画像...',
+                '初始化 OCEAN 人格模型...',
+                '构建虚拟环境...',
+                '启动沙盘推演...',
+                '收集用户反馈...',
+                '计算核心指标...',
+                '生成洞察报告...'
+            ];
+            
+            let statusIndex = 0;
+            const statusInterval = setInterval(() => {
+                if (statusIndex < statuses.length) {
+                    document.getElementById('loading-status').textContent = statuses[statusIndex];
+                    statusIndex++;
+                }
+            }, 500);
+            
+            // 运行模拟
+            if (demoMode) {
+                // 本地 Demo 模式
+                await new Promise(r => setTimeout(r, 3500));
+                clearInterval(statusInterval);
+                
+                const result = generateDemoResult(productName, agentCount, virtualDays, features);
+                showResults(result);
+            } else {
+                // API 模式
+                try {
+                    const response = await fetch(`${API_BASE}/api/simulate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            product_name: productName,
+                            product_description: productDesc,
+                            features: features,
+                            agent_count: agentCount,
+                            virtual_days: virtualDays
+                        })
+                    });
+                    
+                    clearInterval(statusInterval);
+                    const result = await response.json();
+                    showResults(result);
+                } catch (error) {
+                    clearInterval(statusInterval);
+                    alert('API 连接失败，请使用 Demo 模式');
+                    location.reload();
+                }
+            }
+        }
+        
+        function generateDemoResult(productName, agentCount, virtualDays, features) {
+            // 生成模拟数据
+            const signupRate = Math.floor(Math.random() * 40 + 25);
+            const retentionRate = Math.floor(Math.random() * 30 + 35);
+            const nps = Math.floor(Math.random() * 60 - 20);
+            const abandonRate = Math.floor(Math.random() * 25 + 10);
+            
+            // 生成反馈
+            const feedbacks = [
+                "这个功能不错，解决了我的问题 👍",
+                "操作太复杂了，找不到入口 😕",
+                "加载有点慢，等了3秒...",
+                "界面设计挺好看的",
+                "这个功能有什么用？感觉很鸡肋",
+                "终于有人做了这个！",
+                "Bug太多了吧，点两次就崩溃",
+                "体验很流畅，会推荐给朋友",
+                "价格太贵了，学生党负担不起",
+                "还不错，但竞品更好用"
+            ];
+            
+            const actions = [];
+            for (let i = 0; i < 50; i++) {
+                actions.push({
+                    agent_id: `agent_${Math.floor(Math.random() * agentCount)}`,
+                    type: ['view', 'click', 'signup', 'purchase', 'complain', 'praise'][Math.floor(Math.random() * 6)],
+                    target: features.length > 0 ? features[Math.floor(Math.random() * features.length)].name : '核心功能',
+                    feedback: feedbacks[Math.floor(Math.random() * feedbacks.length)],
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            // 生成洞察
+            const insights = [];
+            if (signupRate < 35) insights.push("⚠️ 注册率偏低，建议简化注册流程，减少必填项");
+            if (retentionRate < 45) insights.push("⚠️ 留存率不足，用户缺乏持续使用的动力");
+            if (nps < 0) insights.push("🔴 NPS为负，产品存在严重问题");
+            else if (nps < 30) insights.push("🟡 NPS偏低，产品有改进空间");
+            if (abandonRate > 20) insights.push("⚠️ 放弃率过高，存在体验断层");
+            if (features.length > 0) insights.push(`🔥 热门功能：${features[0].name}`);
+            if (insights.length === 0) insights.push("✅ 产品整体表现良好");
+            
+            return {
+                session_id: `demo_${Date.now()}`,
+                metrics: {
+                    total_agents: agentCount,
+                    signup_rate: signupRate,
+                    retention_rate: retentionRate,
+                    nps: nps,
+                    abandonment_rate: abandonRate,
+                    complaint_rate: Math.floor(Math.random() * 15 + 5)
+                },
+                insights: insights,
+                actions: actions
+            };
+        }
+        
+        function showResults(result) {
+            // 隐藏加载
+            document.getElementById('loading-section').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            // 填充指标
+            document.getElementById('metric-signup').textContent = result.metrics.signup_rate + '%';
+            document.getElementById('metric-retention').textContent = result.metrics.retention_rate + '%';
+            document.getElementById('metric-nps').textContent = result.metrics.nps;
+            document.getElementById('metric-abandon').textContent = result.metrics.abandonment_rate + '%';
+            
+            // 填充洞察
+            const insightsList = document.getElementById('insights-list');
+            insightsList.innerHTML = result.insights.map(insight => `
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <p class="text-gray-700">${insight}</p>
+                </div>
+            `).join('');
+            
+            // 填充活动流
+            const activityFeed = document.getElementById('activity-feed');
+            activityFeed.innerHTML = result.actions.slice(0, 30).map(action => `
+                <div class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                        <span class="text-white text-xs font-medium">${action.agent_id.slice(-2)}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900">${action.feedback}</p>
+                        <p class="text-xs text-gray-400 mt-1">${action.target} · ${action.type}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 回到输入
+        function goBack() {
+            document.getElementById('input-section').classList.remove('hidden');
+            document.getElementById('loading-section').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
