@@ -1,38 +1,44 @@
 # PersonaLab 变更日志
 
-## v0.4 (开发中)
+## v0.4 (2026-04-07)
 
 ### 🆕 新功能
 
-**Agent 社交网络**
-- Agent 之间可以建立社交关系（朋友、关注）
-- 支持口碑传播：推荐/投诉影响朋友
-- 病毒系数计算：衡量产品传播力
-- 社交影响力：高影响力 Agent 影响更多人
+**Agent 社区系统**
+- 真实的社区生态：发帖、评论、点赞、分享
+- 用户等级系统：新人/活跃/达人/KOL
+- 热门内容推荐：Reddit 风格热度算法
+- 功能情感分析：基于社区内容分析用户态度
+- 社交关系：关注、粉丝、好友
 
 **新增指标**
-- `social_interactions`: 社交互动次数
-- `word_of_mouth_reach`: 口碑传播覆盖人数
-- `viral_coefficient`: 病毒传播系数
-- `trending_features`: 社交热度排行
+- `total_posts`: 发帖总数
+- `total_comments`: 评论总数
+- `active_users`: 活跃用户数
+- `level_distribution`: 用户等级分布
+- `feature_sentiments`: 功能情感分析
+- `trending_features`: 热门话题
 
 **新增文件**
-- `backend/social_network.py`: 社交网络引擎
+- `backend/community.py`: 完整社区系统
 
 ### 🔧 技术细节
 
 ```python
-# 社交网络初始化
-network = SocialNetwork(agent_count)
-network.initialize_network(agent_ids)
+# 社区初始化
+community = CommunitySystem("产品社区")
+community.initialize_community(agent_profiles)
 
-# 口碑传播
-network.propagate_recommendation(
-    source_id, feature, attitude, agent_profiles
+# 模拟用户活动
+community.simulate_user_activity(
+    user_id, features, mood, agent_profile
 )
 
-# 获取热度排行
-trending = network.get_trending_features()
+# 获取热门内容
+hot_posts = community.get_hot_posts()
+
+# 功能情感分析
+sentiment = community.get_feature_sentiment("核心功能")
 ```
 
 ---

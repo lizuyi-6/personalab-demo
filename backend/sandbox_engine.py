@@ -13,7 +13,7 @@ from enum import Enum
 import uuid
 
 from agent_generator import AgentProfile, AgentGenerator
-from social_network import SocialNetwork, InteractionType
+from community import CommunitySystem, ContentType, Sentiment
 
 
 class ActionType(Enum):
@@ -174,8 +174,8 @@ class SandboxEngine:
         self.session_id = str(uuid.uuid4())[:8]
         self.realism = RealismEngine()
         
-        # 社交网络
-        self.social_network: Optional[SocialNetwork] = None
+        # 社区系统
+        self.community: Optional[CommunitySystem] = None
         
         # 统计数据
         self.stats = {
@@ -257,20 +257,14 @@ class SandboxEngine:
             # 更新统计
             self._update_stats(action_type, agent.id)
             
-            # 社交传播：好评或投诉时影响朋友
-            if self.social_network:
-                if action_type == ActionType.PRAISE or action_type == ActionType.SHARE:
-                    # 正面传播
-                    attitude = 0.5 + agent.mood * 0.3
-                    self.social_network.propagate_recommendation(
-                        agent.id, feature["name"], attitude, {}
-                    )
-                elif action_type == ActionType.COMPLAIN:
-                    # 负面传播
-                    attitude = -0.5 + agent.mood * 0.3
-                    self.social_network.propagate_recommendation(
-                        agent.id, feature["name"], attitude, {}
-                    )
+            # 社区传播：好评或投诉时发布内容
+            if self.community:
+                self.community.simulate_user_activity(
+                    agent.id,
+                    [f["name"] for f in self.config.features],
+                    agent.mood,
+                    agent.to_dict()
+                )
             
             actions_today += 1
             
@@ -423,10 +417,10 @@ class SandboxEngine:
         
         start_time = datetime.now()
         
-        # 初始化社交网络
-        agent_ids = [agent.id for agent in self.agents]
-        self.social_network = SocialNetwork(len(self.agents))
-        self.social_network.initialize_network(agent_ids)
+        # 初始化社区系统
+        agent_profiles = [agent.to_dict() for agent in self.agents]
+        self.community = CommunitySystem(f"{self.config.product_name}社区")
+        self.community.initialize_community(agent_profiles)
         
         # Agent ID -> AgentProfile 映射
         agent_map = {agent.id: agent for agent in self.agents}
@@ -440,15 +434,8 @@ class SandboxEngine:
             ]
             await asyncio.gather(*tasks)
             
-            # 每日社交互动（口碑传播）
-            features = [f["name"] for f in self.config.features]
-            social_result = self.social_network.simulate_word_of_mouth(
-                agent_map, features, day
-            )
-            
-            # 更新社交统计
-            self.stats["social_interactions"] += social_result["total_recommendations"] + social_result["total_complaints"]
-            self.stats["word_of_mouth_reach"] = len(social_result["influenced_agents"])
+            # 每日社区活动
+            # 所有用户在社区中的互动已通过 simulate_user_activity 完成
             
             # 每日重置活跃用户
             self.stats["daily_active"] = set()
@@ -497,23 +484,30 @@ class SandboxEngine:
         for action in self.actions:
             feature_usage[action.target] = feature_usage.get(action.target, 0) + 1
         
-        # 社交网络指标
-        social_metrics = {}
-        if self.social_network:
-            social_stats = self.social_network.get_social_stats()
-            social_metrics = {
-                "social_interactions": self.stats["social_interactions"],
-                "word_of_mouth_reach": self.stats["word_of_mouth_reach"],
-                "viral_coefficient": social_stats.get("viral_coefficient", 0),
-                "avg_friends": social_stats.get("avg_friends_per_agent", 0)
+        # 社区指标
+        community_metrics = {}
+        if self.community:
+            community_stats = self.community.get_community_stats()
+            community_metrics = {
+                "total_posts": community_stats.get("total_posts", 0),
+                "total_comments": community_stats.get("total_comments", 0),
+                "active_users": community_stats.get("active_users_today", 0),
+                "level_distribution": community_stats.get("level_distribution", {}),
             }
             
-            # 热门功能（社交传播）
-            trending = self.social_network.get_trending_features()
+            # 功能情感分析
+            feature_sentiments = []
+            for f in self.config.features:
+                sentiment = self.community.get_feature_sentiment(f["name"])
+                feature_sentiments.append(sentiment)
+            
+            if feature_sentiments:
+                community_metrics["feature_sentiments"] = feature_sentiments
+            
+            # 热门功能
+            trending = community_stats.get("trending_features", [])
             if trending:
-                social_metrics["trending_features"] = [
-                    {"name": f, "score": round(s, 2)} for f, s in trending[:3]
-                ]
+                community_metrics["trending_features"] = trending
         
         return {
             "total_agents": total_agents,
@@ -525,7 +519,7 @@ class SandboxEngine:
             "complaint_rate": round(self.stats["complaints"] / total_agents * 100, 1),
             "abandonment_rate": round(self.stats["abandonments"] / total_agents * 100, 1),
             "feature_usage": feature_usage,
-            "social_network": social_metrics
+            "community": community_metrics
         }
     
     def _generate_insights(self) -> List[str]:
