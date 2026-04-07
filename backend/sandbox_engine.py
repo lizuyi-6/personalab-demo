@@ -14,6 +14,8 @@ import uuid
 
 from agent_generator import AgentProfile, AgentGenerator
 from community import CommunitySystem, ContentType, Sentiment
+from city_system import CitySystem, Occupation
+from city_system import CitySystem, Occupation, CityResident
 
 
 class ActionType(Enum):
@@ -177,6 +179,9 @@ class SandboxEngine:
         # 社区系统
         self.community: Optional[CommunitySystem] = None
         
+        # 城市系统
+        self.city: Optional[CitySystem] = None
+        
         # 统计数据
         self.stats = {
             "signups": 0,
@@ -188,6 +193,7 @@ class SandboxEngine:
             "feature_usage": {},
             "social_interactions": 0,
             "word_of_mouth_reach": 0,
+            "city_stats": {},  # 城市统计
         }
     
     async def simulate_agent_day(
@@ -422,6 +428,17 @@ class SandboxEngine:
         self.community = CommunitySystem(f"{self.config.product_name}社区")
         self.community.initialize_community(agent_profiles)
         
+        # 初始化城市系统
+        self.city = CitySystem(f"{self.config.product_name}城市")
+        self.city.populate_city(len(self.agents))
+        
+        # 引入产品到城市
+        self.city.introduce_product({
+            "name": self.config.product_name,
+            "category": "产品",
+            "price": 0
+        })
+        
         # Agent ID -> AgentProfile 映射
         agent_map = {agent.id: agent for agent in self.agents}
         
@@ -436,6 +453,12 @@ class SandboxEngine:
             
             # 每日社区活动
             # 所有用户在社区中的互动已通过 simulate_user_activity 完成
+            
+            # 城市产品传播
+            if self.city:
+                adoption = self.city.simulate_product_adoption(
+                    self.config.product_name, days=1
+                )
             
             # 每日重置活跃用户
             self.stats["daily_active"] = set()
@@ -509,6 +532,24 @@ class SandboxEngine:
             if trending:
                 community_metrics["trending_features"] = trending
         
+        # 城市指标
+        city_metrics = {}
+        if self.city:
+            city_overview = self.city.get_city_overview()
+            city_metrics = {
+                "population": city_overview.get("population", 0),
+                "occupation_distribution": city_overview.get("occupation_distribution", {}),
+                "income_distribution": city_overview.get("income_distribution", {}),
+                "adoption_distribution": city_overview.get("adoption_distribution", {}),
+            }
+            
+            # 产品市场报告
+            product_report = self.city.get_product_market_report(self.config.product_name)
+            if "error" not in product_report:
+                city_metrics["product_penetration"] = product_report.get("penetration_rate", 0)
+                city_metrics["product_users"] = product_report.get("total_users", 0)
+                city_metrics["user_demographics"] = product_report.get("user_demographics", {})
+        
         return {
             "total_agents": total_agents,
             "total_actions": len(self.actions),
@@ -519,7 +560,8 @@ class SandboxEngine:
             "complaint_rate": round(self.stats["complaints"] / total_agents * 100, 1),
             "abandonment_rate": round(self.stats["abandonments"] / total_agents * 100, 1),
             "feature_usage": feature_usage,
-            "community": community_metrics
+            "community": community_metrics,
+            "city": city_metrics
         }
     
     def _generate_insights(self) -> List[str]:
