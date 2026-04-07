@@ -13,6 +13,7 @@ from enum import Enum
 import uuid
 
 from agent_generator import AgentProfile, AgentGenerator
+from social_network import SocialNetwork, InteractionType
 
 
 class ActionType(Enum):
@@ -173,6 +174,9 @@ class SandboxEngine:
         self.session_id = str(uuid.uuid4())[:8]
         self.realism = RealismEngine()
         
+        # 社交网络
+        self.social_network: Optional[SocialNetwork] = None
+        
         # 统计数据
         self.stats = {
             "signups": 0,
@@ -182,6 +186,8 @@ class SandboxEngine:
             "abandonments": 0,
             "daily_active": set(),
             "feature_usage": {},
+            "social_interactions": 0,
+            "word_of_mouth_reach": 0,
         }
     
     async def simulate_agent_day(
@@ -250,6 +256,21 @@ class SandboxEngine:
             
             # 更新统计
             self._update_stats(action_type, agent.id)
+            
+            # 社交传播：好评或投诉时影响朋友
+            if self.social_network:
+                if action_type == ActionType.PRAISE or action_type == ActionType.SHARE:
+                    # 正面传播
+                    attitude = 0.5 + agent.mood * 0.3
+                    self.social_network.propagate_recommendation(
+                        agent.id, feature["name"], attitude, {}
+                    )
+                elif action_type == ActionType.COMPLAIN:
+                    # 负面传播
+                    attitude = -0.5 + agent.mood * 0.3
+                    self.social_network.propagate_recommendation(
+                        agent.id, feature["name"], attitude, {}
+                    )
             
             actions_today += 1
             
@@ -402,6 +423,14 @@ class SandboxEngine:
         
         start_time = datetime.now()
         
+        # 初始化社交网络
+        agent_ids = [agent.id for agent in self.agents]
+        self.social_network = SocialNetwork(len(self.agents))
+        self.social_network.initialize_network(agent_ids)
+        
+        # Agent ID -> AgentProfile 映射
+        agent_map = {agent.id: agent for agent in self.agents}
+        
         # 模拟每一天
         for day in range(1, self.config.virtual_days + 1):
             # 并发模拟所有Agent
@@ -410,6 +439,16 @@ class SandboxEngine:
                 for agent in self.agents
             ]
             await asyncio.gather(*tasks)
+            
+            # 每日社交互动（口碑传播）
+            features = [f["name"] for f in self.config.features]
+            social_result = self.social_network.simulate_word_of_mouth(
+                agent_map, features, day
+            )
+            
+            # 更新社交统计
+            self.stats["social_interactions"] += social_result["total_recommendations"] + social_result["total_complaints"]
+            self.stats["word_of_mouth_reach"] = len(social_result["influenced_agents"])
             
             # 每日重置活跃用户
             self.stats["daily_active"] = set()
@@ -458,6 +497,24 @@ class SandboxEngine:
         for action in self.actions:
             feature_usage[action.target] = feature_usage.get(action.target, 0) + 1
         
+        # 社交网络指标
+        social_metrics = {}
+        if self.social_network:
+            social_stats = self.social_network.get_social_stats()
+            social_metrics = {
+                "social_interactions": self.stats["social_interactions"],
+                "word_of_mouth_reach": self.stats["word_of_mouth_reach"],
+                "viral_coefficient": social_stats.get("viral_coefficient", 0),
+                "avg_friends": social_stats.get("avg_friends_per_agent", 0)
+            }
+            
+            # 热门功能（社交传播）
+            trending = self.social_network.get_trending_features()
+            if trending:
+                social_metrics["trending_features"] = [
+                    {"name": f, "score": round(s, 2)} for f, s in trending[:3]
+                ]
+        
         return {
             "total_agents": total_agents,
             "total_actions": len(self.actions),
@@ -467,7 +524,8 @@ class SandboxEngine:
             "nps": round(nps, 1),
             "complaint_rate": round(self.stats["complaints"] / total_agents * 100, 1),
             "abandonment_rate": round(self.stats["abandonments"] / total_agents * 100, 1),
-            "feature_usage": feature_usage
+            "feature_usage": feature_usage,
+            "social_network": social_metrics
         }
     
     def _generate_insights(self) -> List[str]:
